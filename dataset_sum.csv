@@ -1,0 +1,10 @@
+﻿Data,format,source,link
+arbres-abattages,csv,Ville de Montréal,https://donnees.montreal.ca/dataset/abattage-arbres-publics
+ilots-de-chaleur-images-satellite-2023,geojson,Ville de Montréal,https://donnees.montreal.ca/dataset/ilots-de-chaleur
+limites-administratives-agglomeration,geojson,Ville de Montréal,https://donnees.montreal.ca/dataset/limites-administratives-agglomeration
+plantation-priorites,geojson,Ville de Montréal,https://donnees.montreal.ca/dataset/zones-prioritaires-verdir-diminuer-impacts-vagues-chaleur
+arbres-publics,csv,Ville de Montréal,https://donnees.montreal.ca/dataset/arbres
+rsqa-multi-polluants2024,csv,Ville de Montréal,https://donnees.montreal.ca/dataset/rsqa-polluants-gazeux
+liste-des-stations-rsqa,csv,Ville de Montréal,https://donnees.montreal.ca/dataset/rsqa-liste-des-stations
+Canada_Québec_Communauté-Urbaine-de-Montréal.area,geojson,NoiseCapture,https://noise-planet.org/noisecapture_data.html
+tree_species,csv,compilation of wiki information,
