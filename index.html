@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tree MTL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- MapLibre -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header id="topbar">
+    <!-- Left Section: Year Sliders -->
+    <div class="top-left">
+      <!-- Planted year inputs -->
+      <div class="year-group planted">
+        <label class="year-label" id="lbl-planted">Planted year</label>
+        <div class="year-row">
+          <input id="plant-year-min" type="number" min="1900" max="2025" value="1900" class="year-input" />
+          <span class="year-separator">to</span>
+          <input id="plant-year-max" type="number" min="1900" max="2025" value="2025" class="year-input" />
+          <label class="checkbox-inline">
+            <input id="chk-show-alive" type="checkbox" checked />
+            <span id="lbl-show-alive">Show alive trees</span>
+            <span class="dot green"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Felled year inputs -->
+      <div class="year-group felled">
+        <label class="year-label" id="lbl-felled">Felled year</label>
+        <div class="year-row">
+          <input id="fell-year-min" type="number" min="1989" max="2025" value="1989" class="year-input" />
+          <span class="year-separator">to</span>
+          <input id="fell-year-max" type="number" min="1989" max="2025" value="2025" class="year-input" />
+          <label class="checkbox-inline">
+            <input id="chk-show-fell" type="checkbox" />
+            <span id="lbl-show-fell">Show felled trees</span>
+            <span class="dot red"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Section: Title & Language -->
+    <div class="top-center">
+      <h1 id="app-title">Tree MTL</h1>
+      <select id="lang-select" aria-label="Language">
+        <option value="en" selected>EN</option>
+        <option value="fr">FR</option>
+      </select>
+    </div>
+
+    <!-- Right Section: Livability -->
+    <div class="top-right">
+      <div class="livability-group">
+        <div class="livability-row">
+          <label class="livability-label" id="lbl-overlay">Livability by neighborhood</label>
+          <label class="checkbox-inline">
+            <input id="chk-overlay" type="checkbox" />
+          </label>
+        </div>
+        <div class="livability-row">
+          <select id="overlay-metric" aria-label="Livability metric">
+            <option value="heat" selected>Heat (1–5)</option>
+            <option value="laeq">Noise LAeq (dB)</option>
+            <option value="la50">Noise LA50 (dB)</option>
+            <option value="pm25">PM2.5 (µg/m³)</option>
+          </select>
+          <span id="legend-label-low" class="legend-inline-label" hidden>Low</span>
+          <div id="legend" class="legend" hidden></div>
+          <span id="legend-label-high" class="legend-inline-label" hidden>High</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Map loading overlay -->
+<div id="map-loader" aria-live="polite" hidden>
+  <div class="loader-card">
+    <div class="loader-title">Loading data…</div>
+    <div class="loader-progress">
+      <div class="loader-bar" style="width:0%"></div>
+    </div>
+    <div class="loader-meta">
+      <span id="loader-percent">0%</span>
+      <span id="loader-file" class="loader-file"></span>
+    </div>
+  </div>
+</div>
+
+  <!-- Sidebar (right, collapsible) -->
+  <aside id="sidebar" class="open">
+    <button id="sidebar-toggle" class="toggle" title="Collapse">»</button>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="tree" id="tab-tree">Tree Explorer</button>
+      <button class="tab" data-tab="life" id="tab-life">Forest Life</button>
+    </div>
+
+    <div class="tabpanes">
+      <section id="pane-tree" class="pane active">
+        <h2 class="h2" id="tt-tree">Tree Explorer</h2>
+        <div id="tree-card" class="card muted">
+          <p id="tree-empty">Click a tree on the map to see details.</p>
+        </div>
+        <div class="row-inline" style="margin-top:6px; gap:6px;">
+          <button id="btn-reset-species" class="pill small" type="button">Reset selection</button>
+          <button id="btn-all-species" class="pill small" type="button">See all species</button>
+        </div>
+      </section>
+
+      <section id="pane-life" class="pane">
+        <h2 class="h2" id="tt-life">Forest Life</h2>
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-k" id="life-planted-k">–</div>
+            <div class="stat-l" id="life-planted-l">Planted in range</div>
+          </div>
+          <div class="stat">
+            <div class="stat-k" id="life-felled-k">–</div>
+            <div class="stat-l" id="life-felled-l">Felled in range</div>
+          </div>
+        </div>
+        <h3 class="h3" id="life-top-planted">Top planted species</h3>
+        <ul id="top-planted" class="bullets"></ul>
+        <h3 class="h3" id="life-top-felled">Top felled species</h3>
+        <ul id="top-felled" class="bullets"></ul>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Footer (bottom-left) -->
+  <footer id="footer">
+    <button id="btn-attrib" class="pill">Sources</button>
+    <button id="btn-feedback" class="pill">Feedback</button>
+    <button id="btn-nearme" class="pill">Find trees near me</button>
+  </footer>
+
+  <!-- Attribution Modal -->
+  <div id="modal-attrib" class="modal" hidden>
+    <div class="modal-content">
+      <button class="modal-close" data-close>×</button>
+      <h2 class="h2">Data Sources</h2>
+      <div id="attrib-body">
+        <p>Montreal public trees, felling records, RSQA air quality, noise layer, heat island polygons. Basemap © OpenStreetMap contributors.</p>
+        <p>You can customize this with your <code>dataset_sum.csv</code> contents.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="modal-feedback" class="modal" hidden>
+    <div class="modal-content">
+      <button class="modal-close" data-close>×</button>
+      <h2 class="h2" id="fb-title">Feedback</h2>
+
+      <div class="form">
+        <label class="lbl" id="fb-lbl-type">Type</label>
+        <select id="fb-type">
+          <option value="missing">Missing tree</option>
+          <option value="issue">Existing tree issue</option>
+          <option value="incorrect">Incorrect info</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label class="lbl" id="fb-lbl-location">Location</label>
+        <div class="pick-row">
+          <input id="fb-location" type="text" placeholder="Click map or paste coordinates/address" />
+          <button id="fb-pick" class="pill small" type="button">Pick on map</button>
+        </div>
+
+        <div id="fb-species-wrap">
+          <label class="lbl" id="fb-lbl-species">Species</label>
+          <input id="fb-species" type="text" placeholder="Optional" />
+        </div>
+
+        <div id="fb-issue-wrap" hidden>
+          <label class="lbl" id="fb-lbl-issue">Issue type</label>
+          <select id="fb-issue">
+            <option>Broken branch</option>
+            <option>Obstruction</option>
+            <option>Pest</option>
+            <option>Vandalism</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <label class="lbl" id="fb-lbl-photo">Photo</label>
+        <input id="fb-photo" type="file" accept="image/*" />
+
+        <label class="lbl" id="fb-lbl-desc">Description</label>
+        <textarea id="fb-desc" rows="3" placeholder="Required for Incorrect info / Other"></textarea>
+
+        <label class="lbl" id="fb-lbl-contact">Contact</label>
+        <input id="fb-contact" type="text" placeholder="Email or phone (optional)" />
+
+        <div class="actions">
+          <button id="fb-cancel" class="pill alt" type="button">Cancel</button>
+          <button id="fb-submit" class="pill" type="button">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+
