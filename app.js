@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Pale basemap
         'basemap': {
           type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
+          tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'?key=cb1_484h_1_bbc22fa6668e8411fe0b29df],
           tileSize: 256,
           attribution:
             '© OpenStreetMap © CARTO'
